@@ -4,3 +4,4 @@ aiohttp-session[secure]
 motor
 pyjwt
 python-dotenv
+gunicorn

@@ -1,3 +1,5 @@
+import asyncio
+
 import aiohttp_cors
 from aiohttp import web
 from aiohttp_session import setup as setup_session
@@ -8,6 +10,7 @@ from database import db
 from routes.auth import routes as auth_routes
 from routes.servers import routes as servers_routes
 from routes.beta import routes as beta_routes
+
 
 async def init_db(app):
     db.connect()
@@ -44,5 +47,8 @@ async def create_app():
     
     return app
 
+loop = asyncio.get_event_loop()
+app = loop.run_until_complete(create_app())
+
 if __name__ == '__main__':
-    web.run_app(create_app(), port=8311)
+    web.run_app(app, port=config.PORT)
