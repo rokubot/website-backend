@@ -7,7 +7,7 @@ routes = web.RouteTableDef()
 
 DISCORD_API_BASE = "https://discord.com/api/v10"
 
-@routes.get('/api/auth/login')
+@routes.get('/auth/login')
 async def login(request):
     
 
@@ -29,7 +29,7 @@ async def login(request):
 
     raise web.HTTPFound(f"https://discord.com/api/oauth2/authorize?{params}")
 
-@routes.get('/api/auth/callback')
+@routes.get('/auth/callback')
 async def callback(request):
     code = request.query.get('code')
     state = request.query.get('state')
@@ -80,7 +80,7 @@ async def callback(request):
 
     return web.HTTPFound(f"{frontend_base}{return_path}")
 
-@routes.get('/api/auth/me')
+@routes.get('/auth/me')
 async def get_me(request):
     sess = await aiohttp_session.get_session(request)
     user = sess.get('user')
@@ -88,7 +88,7 @@ async def get_me(request):
         return web.json_response({"error": "Not authenticated"}, status=401)
     return web.json_response(user)
 
-@routes.get('/api/auth/logout')
+@routes.get('/auth/logout')
 async def logout(request):
     sess = await aiohttp_session.get_session(request)
     sess.invalidate()

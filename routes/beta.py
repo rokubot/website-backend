@@ -8,7 +8,7 @@ routes = web.RouteTableDef()
 DISCORD_API_BASE = "https://discord.com/api/v10"
 
 
-@routes.post('/api/beta/enroll')
+@routes.post('/beta/enroll')
 async def enroll_beta(request):
     sess = await aiohttp_session.get_session(request)
     access_token = sess.get('access_token')
