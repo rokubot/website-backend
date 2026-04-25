@@ -6,9 +6,11 @@ from cryptography.fernet import Fernet
 
 load_dotenv()
 
+PORT = os.getenv("PORT", 8080)
 DISCORD_CLIENT_ID = os.getenv("DISCORD_CLIENT_ID")
 DISCORD_CLIENT_SECRET = os.getenv("DISCORD_CLIENT_SECRET")
 DISCORD_REDIRECT_URI = os.getenv("DISCORD_REDIRECT_URI")
+
 
 # Session secret needs to be 32 url-safe base64-encoded bytes
 SESSION_SECRET = base64.urlsafe_b64decode(os.getenv("SESSION_SECRET"))
