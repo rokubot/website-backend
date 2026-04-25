@@ -1,12 +1,14 @@
 import datetime
 from aiohttp import web, ClientSession
 import aiohttp_session
+from pymongo.errors import DuplicateKeyError
 from database import db
 
 routes = web.RouteTableDef()
 DISCORD_API_BASE = "https://discord.com/api/v10"
 
-@routes.post('/api/beta/enroll')
+
+@routes.post('/beta/enroll')
 async def enroll_beta(request):
     sess = await aiohttp_session.get_session(request)
     access_token = sess.get('access_token')
@@ -23,7 +25,6 @@ async def enroll_beta(request):
     if not server_id:
         return web.json_response({"error": "server_id is required"}, status=400)
         
-    # Verify user has access to this server
     headers = {"Authorization": f"Bearer {access_token}"}
     async with ClientSession() as session:
         async with session.get(f"{DISCORD_API_BASE}/users/@me/guilds", headers=headers) as resp:
@@ -39,16 +40,15 @@ async def enroll_beta(request):
     if (perms & 0x20) != 0x20 and (perms & 0x8) != 0x8:
         return web.json_response({"error": "You do not have permission to enroll this server"}, status=403)
         
-    # Add to beta_servers collection
-    await db.db.beta_servers.update_one(
-        {"server_id": str(server_id)},
-        {"$set": {
-            "server_id": str(server_id),
+    # Insert into beta_servers — _id is the server_id as int
+    try:
+        await db.beta_servers.insert_one({
+            "_id": int(server_id),
             "server_name": target_guild.get("name"),
-            "enrolled_by": user.get("id"),
+            "enrolled_by": int(user.get("id")),
             "enrolled_at": datetime.datetime.utcnow()
-        }},
-        upsert=True
-    )
+        })
+    except DuplicateKeyError:
+        return web.json_response({"error": "This server is already enrolled in beta"}, status=409)
     
     return web.json_response({"success": True, "message": "Server enrolled successfully"})

@@ -4,7 +4,7 @@ import aiohttp_session
 routes = web.RouteTableDef()
 DISCORD_API_BASE = "https://discord.com/api/v10"
 
-@routes.get('/api/servers')
+@routes.get('/servers')
 async def get_servers(request):
     sess = await aiohttp_session.get_session(request)
     access_token = sess.get('access_token')
@@ -20,7 +20,7 @@ async def get_servers(request):
             
     return web.json_response(guilds)
 
-@routes.get('/api/servers/managed')
+@routes.get('/servers/managed')
 async def get_managed_servers(request):
     sess = await aiohttp_session.get_session(request)
     access_token = sess.get('access_token')
@@ -43,7 +43,7 @@ async def get_managed_servers(request):
             
     return web.json_response(managed_guilds)
 
-@routes.get('/api/servers/{server_id}')
+@routes.get('/servers/{server_id}')
 async def get_server_info(request):
     server_id = request.match_info.get('server_id')
     return web.json_response({"message": "Not implemented yet"})

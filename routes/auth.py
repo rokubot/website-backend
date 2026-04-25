@@ -1,31 +1,35 @@
 from aiohttp import web, ClientSession
 import aiohttp_session
 import config
+import urllib.parse
 
 routes = web.RouteTableDef()
 
 DISCORD_API_BASE = "https://discord.com/api/v10"
 
-@routes.get('/api/auth/login')
+@routes.get('/auth/login')
 async def login(request):
+    
+
     return_to = request.query.get('return_to', '/')
     if not return_to.startswith('/'):
         return_to = '/'
-        
-    import urllib.parse
-    state = urllib.parse.quote(return_to)
-    
-    redirect_url = (
-        f"https://discord.com/api/oauth2/authorize"
-        f"?client_id={config.DISCORD_CLIENT_ID}"
-        f"&redirect_uri={config.DISCORD_REDIRECT_URI}"
-        f"&response_type=code"
-        f"&scope=identify%20guilds"
-        f"&state={state}"
-    )
-    raise web.HTTPFound(redirect_url)
 
-@routes.get('/api/auth/callback')
+    redirect_uri = config.DISCORD_REDIRECT_URI
+    if not redirect_uri:
+        return web.json_response({"error": "DISCORD_REDIRECT_URI is not configured"}, status=500)
+
+    params = urllib.parse.urlencode({
+        "client_id": config.DISCORD_CLIENT_ID,
+        "redirect_uri": redirect_uri,
+        "response_type": "code",
+        "scope": "identify guilds",
+        "state": return_to,
+    })
+
+    raise web.HTTPFound(f"https://discord.com/api/oauth2/authorize?{params}")
+
+@routes.get('/auth/callback')
 async def callback(request):
     code = request.query.get('code')
     state = request.query.get('state')
@@ -76,7 +80,7 @@ async def callback(request):
 
     return web.HTTPFound(f"{frontend_base}{return_path}")
 
-@routes.get('/api/auth/me')
+@routes.get('/auth/me')
 async def get_me(request):
     sess = await aiohttp_session.get_session(request)
     user = sess.get('user')
@@ -84,7 +88,7 @@ async def get_me(request):
         return web.json_response({"error": "Not authenticated"}, status=401)
     return web.json_response(user)
 
-@routes.get('/api/auth/logout')
+@routes.get('/auth/logout')
 async def logout(request):
     sess = await aiohttp_session.get_session(request)
     sess.invalidate()
