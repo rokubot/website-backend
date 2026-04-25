@@ -31,8 +31,8 @@ async def create_app():
     cors = aiohttp_cors.setup(app, defaults={
         url: aiohttp_cors.ResourceOptions(
             allow_credentials=True,
-            expose_headers="*",
-            allow_headers="*",
+            allow_headers=("Content-Type", "Authorization", "X-Requested-With"),
+            expose_headers=("Content-Type",),
         ) for url in config.FRONTEND_URLS
     })
     
@@ -45,4 +45,4 @@ async def create_app():
     return app
 
 if __name__ == '__main__':
-    web.run_app(create_app(), port=8311)
+    web.run_app(create_app(), port=8991)
