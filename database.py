@@ -3,12 +3,10 @@ import config
 
 class Database:
     client: AsyncIOMotorClient = None
-    db = None
 
     @classmethod
     def connect(cls):
         cls.client = AsyncIOMotorClient(config.MONGODB_URI)
-        cls.db = cls.client[config.DB_NAME]
         print("Connected to MongoDB")
 
     @classmethod
@@ -16,5 +14,13 @@ class Database:
         if cls.client:
             cls.client.close()
             print("Disconnected from MongoDB")
+
+    @property
+    def db(self):
+        return self.client[config.DB_NAME]
+
+    def __getattr__(self, name):
+        # Allows db.welcome instead of db.db.welcome
+        return getattr(self.client[config.DB_NAME], name)
 
 db = Database()

@@ -2,19 +2,19 @@ import base64
 import os
 import secrets
 from dotenv import load_dotenv
+from cryptography.fernet import Fernet
 
 load_dotenv()
 
-DISCORD_CLIENT_ID = os.getenv("DISCORD_CLIENT_ID", "")
-DISCORD_CLIENT_SECRET = os.getenv("DISCORD_CLIENT_SECRET", "")
-DISCORD_REDIRECT_URI = os.getenv("DISCORD_REDIRECT_URI", "http://localhost:8080/api/auth/callback")
+DISCORD_CLIENT_ID = os.getenv("DISCORD_CLIENT_ID")
+DISCORD_CLIENT_SECRET = os.getenv("DISCORD_CLIENT_SECRET")
+DISCORD_REDIRECT_URI = os.getenv("DISCORD_REDIRECT_URI")
 
 # Session secret needs to be 32 url-safe base64-encoded bytes
-_session_secret_env = os.getenv("SESSION_SECRET")
-SESSION_SECRET = _session_secret_env.encode('utf-8')
+SESSION_SECRET = base64.urlsafe_b64decode(os.getenv("SESSION_SECRET"))
 
 
-MONGODB_URI = os.getenv("MONGODB_URI", "mongodb://localhost:27017")
+MONGODB_URI = os.getenv("MONGODB_URI")
 DB_NAME = os.getenv("DB_NAME", "roku")
 FRONTEND_URLS = [
     "http://localhost:5173",
