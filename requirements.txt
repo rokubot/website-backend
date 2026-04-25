@@ -1,0 +1,6 @@
+aiohttp
+aiohttp-cors
+aiohttp-session[secure]
+motor
+pyjwt
+python-dotenv
