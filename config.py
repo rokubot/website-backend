@@ -19,8 +19,8 @@ SESSION_SECRET = base64.urlsafe_b64decode(os.getenv("SESSION_SECRET"))
 MONGODB_URI = os.getenv("MONGODB_URI")
 DB_NAME = os.getenv("DB_NAME", "roku")
 FRONTEND_URLS = [
-    "http://localhost:5173",
-    "https://beta.rokubot.com",
     "https://rokubot.com",
+    "https://beta.rokubot.com",
+    "http://localhost:5173",
     "http://localhost:8080"
 ]
