@@ -51,4 +51,4 @@ loop = asyncio.get_event_loop()
 app = loop.run_until_complete(create_app())
 
 if __name__ == '__main__':
-    web.run_app(app, port=config.PORT)
+    web.run_app(app, port=int(config.PORT))

@@ -40,6 +40,11 @@ async def enroll_beta(request):
     if (perms & 0x20) != 0x20 and (perms & 0x8) != 0x8:
         return web.json_response({"error": "You do not have permission to enroll this server"}, status=403)
         
+    # Check if beta is full
+    beta_count = await db.beta_servers.count_documents({})
+    if beta_count >= 70:
+        return web.json_response({"error": "Beta enrollment is full (maximum 70 servers allowed)."}, status=403)
+        
     # Insert into beta_servers — _id is the server_id as int
     try:
         await db.beta_servers.insert_one({
