@@ -1,5 +1,3 @@
-import asyncio
-
 import aiohttp_cors
 from aiohttp import web
 from aiohttp_session import setup as setup_session
@@ -7,9 +5,11 @@ from aiohttp_session.cookie_storage import EncryptedCookieStorage
 
 import config
 from database import db
+from routes import routes
 from routes.auth import routes as auth_routes
 from routes.servers import routes as servers_routes
 from routes.beta import routes as beta_routes
+from routes.basic import routes as basic_routes
 
 
 async def init_db(app):
@@ -26,9 +26,7 @@ async def create_app():
     setup_session(app, EncryptedCookieStorage(config.SESSION_SECRET))
     
     # Add routes
-    app.router.add_routes(auth_routes)
-    app.router.add_routes(servers_routes)
-    app.router.add_routes(beta_routes)
+    app.add_routes(routes)
     
     # Setup CORS
     cors = aiohttp_cors.setup(app, defaults={
@@ -46,9 +44,3 @@ async def create_app():
     app.on_cleanup.append(close_db)
     
     return app
-
-loop = asyncio.get_event_loop()
-app = loop.run_until_complete(create_app())
-
-if __name__ == '__main__':
-    web.run_app(app, port=int(config.PORT))
