@@ -1,0 +1,15 @@
+[project]
+name = "roku-backend"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.14"
+dependencies = [
+    "aiohttp>=3.14.3",
+    "aiohttp-cors>=0.8.1",
+    "aiohttp-session[secure]>=2.12.1",
+    "gunicorn>=26.2.0",
+    "motor>=3.7.1",
+    "pyjwt>=2.15.1",
+    "python-dotenv>=1.2.3",
+]
