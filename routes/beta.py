@@ -1,7 +1,5 @@
-import datetime
 from aiohttp import web, ClientSession
 import aiohttp_session
-from pymongo.errors import DuplicateKeyError
 from database import db
 
 routes = web.RouteTableDef()
@@ -41,19 +39,22 @@ async def enroll_beta(request):
         return web.json_response({"error": "You do not have permission to enroll this server"}, status=403)
         
     # Check if beta is full
-    beta_count = await db.beta_servers.count_documents({})
+    beta_count = await db.fetchval("SELECT COUNT(*) FROM beta_guilds")
     if beta_count >= 70:
         return web.json_response({"error": "Beta enrollment is full (maximum 70 servers allowed)."}, status=403)
         
-    # Insert into beta_servers — _id is the server_id as int
-    try:
-        await db.beta_servers.insert_one({
-            "_id": int(server_id),
-            "server_name": target_guild.get("name"),
-            "enrolled_by": int(user.get("id")),
-            "enrolled_at": datetime.datetime.utcnow()
-        })
-    except DuplicateKeyError:
+    inserted_guild_id = await db.fetchval(
+        """
+        INSERT INTO beta_guilds (guild_id, guild_name, enrolled_by)
+        VALUES ($1, $2, $3)
+        ON CONFLICT (guild_id) DO NOTHING
+        RETURNING guild_id
+        """,
+        int(server_id),
+        target_guild.get("name"),
+        int(user.get("id")),
+    )
+    if inserted_guild_id is None:
         return web.json_response({"error": "This server is already enrolled in beta"}, status=409)
     
     return web.json_response({"success": True, "message": "Server enrolled successfully"})

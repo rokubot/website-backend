@@ -13,10 +13,10 @@ from routes.basic import routes as basic_routes
 
 
 async def init_db(app):
-    db.connect()
+    await db.connect()
 
 async def close_db(app):
-    db.disconnect()
+    await db.disconnect()
 
 async def create_app():
     app = web.Application()
