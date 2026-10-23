@@ -1,3 +1,8 @@
+<<<<<<< HEAD
+=======
+import asyncio
+
+>>>>>>> master
 import aiohttp_cors
 from aiohttp import web
 from aiohttp_session import setup as setup_session
@@ -5,6 +10,7 @@ from aiohttp_session.cookie_storage import EncryptedCookieStorage
 
 import config
 from database import db
+<<<<<<< HEAD
 from routes import routes
 from routes.auth import routes as auth_routes
 from routes.servers import routes as servers_routes
@@ -17,6 +23,18 @@ async def init_db(app):
 
 async def close_db(app):
     await db.disconnect()
+=======
+from routes.auth import routes as auth_routes
+from routes.servers import routes as servers_routes
+from routes.beta import routes as beta_routes
+
+
+async def init_db(app):
+    db.connect()
+
+async def close_db(app):
+    db.disconnect()
+>>>>>>> master
 
 async def create_app():
     app = web.Application()
@@ -26,7 +44,13 @@ async def create_app():
     setup_session(app, EncryptedCookieStorage(config.SESSION_SECRET))
     
     # Add routes
+<<<<<<< HEAD
     app.add_routes(routes)
+=======
+    app.router.add_routes(auth_routes)
+    app.router.add_routes(servers_routes)
+    app.router.add_routes(beta_routes)
+>>>>>>> master
     
     # Setup CORS
     cors = aiohttp_cors.setup(app, defaults={
@@ -44,3 +68,12 @@ async def create_app():
     app.on_cleanup.append(close_db)
     
     return app
+<<<<<<< HEAD
+=======
+
+loop = asyncio.get_event_loop()
+app = loop.run_until_complete(create_app())
+
+if __name__ == '__main__':
+    web.run_app(app, port=config.PORT)
+>>>>>>> master
