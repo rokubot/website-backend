@@ -1,6 +1,5 @@
 from aiohttp import web, ClientSession
 import aiohttp_session
-from database import db
 
 routes = web.RouteTableDef()
 DISCORD_API_BASE = "https://discord.com/api/v10"
@@ -39,6 +38,7 @@ async def enroll_beta(request):
         return web.json_response({"error": "You do not have permission to enroll this server"}, status=403)
         
     # Check if beta is full
+    db = request.app['db']
     beta_count = await db.fetchval("SELECT COUNT(*) FROM beta_guilds")
     if beta_count >= 70:
         return web.json_response({"error": "Beta enrollment is full (maximum 70 servers allowed)."}, status=403)

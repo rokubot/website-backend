@@ -7,10 +7,13 @@ import config
 from database import db
 from routes import routes
 
-async def init_db(app):
-    await db.connect()
 
-async def close_db(app):
+async def db_context(app):
+    await db.connect()
+    app['db'] = db
+    
+    yield  # Application runs here
+    
     await db.disconnect()
 
 async def create_app():
@@ -35,7 +38,6 @@ async def create_app():
     for route in list(app.router.routes()):
         cors.add(route)
         
-    app.on_startup.append(init_db)
-    app.on_cleanup.append(close_db)
+    app.cleanup_ctx.append(db_context)
     
     return app
