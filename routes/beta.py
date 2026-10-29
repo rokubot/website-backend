@@ -37,23 +37,25 @@ async def enroll_beta(request):
     if (perms & 0x20) != 0x20 and (perms & 0x8) != 0x8:
         return web.json_response({"error": "You do not have permission to enroll this server"}, status=403)
         
-    # Check if beta is full
     db = request.app['db']
-    beta_count = await db.fetchval("SELECT COUNT(*) FROM beta_guilds")
-    if beta_count >= 70:
-        return web.json_response({"error": "Beta enrollment is full (maximum 70 servers allowed)."}, status=403)
-        
-    inserted_guild_id = await db.fetchval(
-        """
-        INSERT INTO beta_guilds (guild_id, guild_name, enrolled_by)
-        VALUES ($1, $2, $3)
-        ON CONFLICT (guild_id) DO NOTHING
-        RETURNING guild_id
-        """,
-        int(server_id),
-        target_guild.get("name"),
-        int(user.get("id")),
-    )
+    async with db.acquire() as conn:
+        async with conn.transaction():
+            await conn.execute("LOCK TABLE beta_guilds IN EXCLUSIVE MODE")
+            beta_count = await conn.fetchval("SELECT COUNT(*) FROM beta_guilds")
+            if beta_count >= 70:
+                return web.json_response({"error": "Beta enrollment is full (maximum 70 servers allowed)."}, status=403)
+
+            inserted_guild_id = await conn.fetchval(
+                """
+                INSERT INTO beta_guilds (guild_id, guild_name, enrolled_by)
+                VALUES ($1, $2, $3)
+                ON CONFLICT (guild_id) DO NOTHING
+                RETURNING guild_id
+                """,
+                int(server_id),
+                target_guild.get("name"),
+                int(user.get("id")),
+            )
     if inserted_guild_id is None:
         return web.json_response({"error": "This server is already enrolled in beta"}, status=409)
     
