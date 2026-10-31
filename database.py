@@ -1,26 +1,28 @@
-from motor.motor_asyncio import AsyncIOMotorClient
+import asyncpg
+
 import config
 
+
 class Database:
-    client: AsyncIOMotorClient = None
+    pool: asyncpg.Pool | None = None
 
-    @classmethod
-    def connect(cls):
-        cls.client = AsyncIOMotorClient(config.MONGODB_URI)
-        print("Connected to MongoDB")
+    async def connect(self):
+        if not config.DATABASE_URL:
+            raise RuntimeError("DATABASE_URL environment variable is required")
 
-    @classmethod
-    def disconnect(cls):
-        if cls.client:
-            cls.client.close()
-            print("Disconnected from MongoDB")
+        self.pool = await asyncpg.create_pool(dsn=config.DATABASE_URL)
+        print("Connected to PostgreSQL")
 
-    @property
-    def db(self):
-        return self.client[config.DB_NAME]
+    async def disconnect(self):
+        if self.pool is not None:
+            await self.pool.close()
+            self.pool = None
+            print("Disconnected from PostgreSQL")
 
     def __getattr__(self, name):
-        # Allows db.welcome instead of db.db.welcome
-        return getattr(self.client[config.DB_NAME], name)
+        if self.pool is None:
+            raise RuntimeError("PostgreSQL connection pool is not initialized")
+        return getattr(self.pool, name)
+
 
 db = Database()

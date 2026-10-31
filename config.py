@@ -1,8 +1,6 @@
 import base64
 import os
-import secrets
 from dotenv import load_dotenv
-from cryptography.fernet import Fernet
 
 load_dotenv()
 
@@ -16,11 +14,12 @@ DISCORD_REDIRECT_URI = os.getenv("DISCORD_REDIRECT_URI")
 SESSION_SECRET = base64.urlsafe_b64decode(os.getenv("SESSION_SECRET"))
 
 
-MONGODB_URI = os.getenv("MONGODB_URI")
-DB_NAME = os.getenv("DB_NAME", "roku")
-FRONTEND_URLS = [
-    "http://localhost:5173",
-    "https://beta.rokubot.com",
-    "https://rokubot.com",
-    "http://localhost:8080"
-]
+DATABASE_URL = os.getenv("DATABASE_URL")
+_frontend_urls_env = os.getenv("FRONTEND_URLS")
+if _frontend_urls_env:
+    FRONTEND_URLS = [url.strip() for url in _frontend_urls_env.split(",") if url.strip()]
+else:
+    FRONTEND_URLS = [
+        "https://beta.rokubot.com",
+        "https://rokubot.com",
+    ]
